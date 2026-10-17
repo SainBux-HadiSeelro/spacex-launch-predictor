@@ -1,210 +1,192 @@
-# # spacex_dashboard.py
-# import streamlit as st
-# import pandas as pd
-# import folium
-# from streamlit_folium import st_folium
-# import joblib
-
-# # Load data
-# df = pd.read_csv("spacex_cleaned.csv")
-# # get year
-# df['year'] = pd.to_datetime(df['launch_date']).dt.year
-
-# # Load trained model
-# model = joblib.load("random_forest_model.pkl")
-
-# # Page setup
-# st.set_page_config(layout="wide")
-# st.title("SpaceX Launch Analysis & Prediction Dashboard")
-
-# # Historical Launch Data Viewer 
-# st.header("Launch History Viewer")
-
-# years = sorted(df['year'].unique())
-# launchpads = sorted(df['site_name'].unique())
-
-# selected_year = st.selectbox("Filter by Year", options=["All"] + years)
-# selected_pad = st.selectbox("Filter by Launchpad", options=["All"] + launchpads)
-
-# filtered_df = df.copy()
-# if selected_year != "All":
-#     filtered_df = filtered_df[filtered_df['year'] == selected_year]
-# if selected_pad != "All":
-#     filtered_df = filtered_df[filtered_df['site_name'] == selected_pad]
-
-# st.dataframe(filtered_df)
-
-# #  Geospatial Map
-# st.header("Launch Sites Map")
-
-# map_df = filtered_df.copy()
-# map_df['color'] = map_df['success'].apply(lambda x: 'green' if x == 1 else 'red')
-
-# launch_map = folium.Map(location=[28.5, -80.6], zoom_start=3)
-
-# for _, row in map_df.iterrows():
-#     location_name = row.get('location', 'Unknown')
-#     lat_lon = location_name.split(',')[-2:] if ',' in location_name else ["28.5", "-80.6"]
-#     try:
-#         lat, lon = float(lat_lon[0]), float(lat_lon[1])
-#     except:
-#         lat, lon = 28.5, -80.6  # fallback
-
-#     folium.CircleMarker(
-#         location=[lat, lon],
-#         radius=6,
-#         color=row['color'],
-#         fill=True,
-#         fill_opacity=0.7,
-#         popup=f"{row['mission_name']} | {row['rocket_name']} | Success: {row['success']}"
-#     ).add_to(launch_map)
-
-# st_folium(launch_map, width=700)
-
-# # Prediction Tool
-# st.header("Launch Success Predictor")
-
-# st.markdown("Enter launch details to estimate success probability:")
-
-# # Feature Inputs (match features used in training)
-# payload_mass = st.slider("Payload Mass (kg)", min_value=0, max_value=10000, value=5000)
-# year = st.slider("Launch Year", min_value=2006, max_value=2025, value=2020)
-
-# rocket_name = st.selectbox("Rocket Name", sorted(df['rocket_name'].unique()))
-# launchpad_name = st.selectbox("Launchpad Name", sorted(df['site_name'].unique()))
-
-# # Prepare input in same format as training set
-# input_dict = {
-#     'payload_mass': payload_mass,
-#     'year': year,
-#     f'rocket_name_{rocket_name}': 1,
-#     f'site_name_{launchpad_name}': 1
-# }
-
-
-# # All feature columns from training
-# model_features = model.feature_names_in_
-# input_data = pd.DataFrame([0] * len(model_features), index=model_features).T
-
-# # Set matching features
-# for col in input_dict:
-#     if col in input_data.columns:
-#         input_data[col] = input_dict[col]
-
-# if st.button("Predict Launch Success"):
-#     pred = model.predict(input_data)[0]
-#     prob = model.predict_proba(input_data)[0][1]
-#     st.success(f"Predicted Success: {'Yes' if pred == 1 else 'No'} with probability {prob:.2f}")
-
-
-
-
-
-
-
-
-
 import streamlit as st
 import pandas as pd
 import folium
+from folium.plugins import MarkerCluster
 from streamlit_folium import st_folium
 import joblib
 
-# Load data
-df = pd.read_csv("spacex_cleaned.csv")
-df['year'] = pd.to_datetime(df['launch_date']).dt.year
+# Set page layout and title
+st.set_page_config(
+    page_title="SpaceX Launch Analysis & Prediction",
+    page_icon="🚀",
+    layout="wide"
+)
 
-# Load trained model
-model = joblib.load("random_forest_model.pkl")
-model_features = model.feature_names_in_  # features used during training
+# Launch site coordinates mapping
+LAUNCHPAD_COORDS = {
+    'CCSFS SLC 40': (28.5618571, -80.577366),
+    'KSC LC 39A': (28.6080585, -80.6039558),
+    'VAFB SLC 4E': (34.632093, -120.610829),
+    'Kwajalein Atoll': (9.0477206, 167.7431292)
+}
 
-# Page setup
-st.set_page_config(layout="wide")
-st.title("SpaceX Launch Analysis & Prediction Dashboard")
+# Site to location name mapping
+SITE_TO_LOCATION = {
+    'CCSFS SLC 40': 'Cape Canaveral',
+    'KSC LC 39A': 'Cape Canaveral',
+    'Kwajalein Atoll': 'Omelek Island',
+    'VAFB SLC 4E': 'Vandenberg Space Force Base'
+}
+
+# Load dataset with caching
+@st.cache_data
+def load_data():
+    df = pd.read_csv("spacex_cleaned.csv")
+    df['launch_date_dt'] = pd.to_datetime(df['launch_date'], errors='coerce')
+    df['year'] = df['launch_date_dt'].dt.year.fillna(0).astype(int)
+    # Normalize success column to boolean (True/False/None)
+    df['is_success'] = df['success'].apply(
+        lambda x: True if x is True or x == 1 else (False if x is False or x == 0 else None)
+    )
+    return df
+
+# Load trained model with caching
+@st.cache_resource
+def load_model():
+    return joblib.load("random_forest_model.pkl")
+
+# Initialize data and model
+df = load_data()
+model = load_model()
+model_features = getattr(model, 'feature_names_in_', [])
+
+st.title("🚀 SpaceX Launch Analysis & Prediction Dashboard")
+st.markdown("Explore SpaceX launch history, geospatial launch sites, and predict launch success probability using Machine Learning.")
+
+# Overview KPIs / Metrics
+total_launches = len(df)
+successful_launches = int((df['is_success'] == True).sum())
+failed_launches = int((df['is_success'] == False).sum())
+success_rate = (successful_launches / total_launches * 100) if total_launches > 0 else 0
+
+col1, col2, col3, col4 = st.columns(4)
+col1.metric("Total Launches", total_launches)
+col2.metric("Successful Launches", successful_launches)
+col3.metric("Failed Launches", failed_launches)
+col4.metric("Overall Success Rate", f"{success_rate:.1f}%")
+
+st.divider()
 
 # Historical Launch Data Viewer
-st.header("Launch History Viewer")
+st.header("📊 Launch History Viewer")
 
-years = sorted(df['year'].unique())
-launchpads = sorted(df['site_name'].unique())
+years = sorted([y for y in df['year'].unique() if y > 0])
+launchpads = sorted(df['site_name'].dropna().unique())
+rockets = sorted(df['rocket_name'].dropna().unique())
 
-selected_year = st.selectbox("Filter by Year", options=["All"] + years)
-selected_pad = st.selectbox("Filter by Launchpad", options=["All"] + launchpads)
+f_col1, f_col2, f_col3 = st.columns(3)
+with f_col1:
+    selected_year = st.selectbox("Filter by Year", options=["All"] + years)
+with f_col2:
+    selected_pad = st.selectbox("Filter by Launchpad", options=["All"] + launchpads)
+with f_col3:
+    selected_rocket = st.selectbox("Filter by Rocket", options=["All"] + rockets)
 
 filtered_df = df.copy()
 if selected_year != "All":
     filtered_df = filtered_df[filtered_df['year'] == selected_year]
 if selected_pad != "All":
     filtered_df = filtered_df[filtered_df['site_name'] == selected_pad]
+if selected_rocket != "All":
+    filtered_df = filtered_df[filtered_df['rocket_name'] == selected_rocket]
 
-st.dataframe(filtered_df)
+st.markdown(f"**Showing {len(filtered_df)} launch record(s):**")
+display_cols = ['mission_name', 'launch_date', 'rocket_name', 'payload_mass', 'orbit', 'site_name', 'location', 'is_success']
+display_df = filtered_df[[c for c in display_cols if c in filtered_df.columns]].copy()
+display_df.rename(columns={'is_success': 'success'}, inplace=True)
+st.dataframe(display_df, use_container_width=True)
 
-# Launch Sites Map
-st.header("Launch Sites Map")
+st.divider()
 
-map_df = filtered_df.copy()
-map_df['color'] = map_df['success'].apply(lambda x: 'green' if x == 1 else 'red')
+# Geospatial Launch Sites Map
+st.header("🗺️ Launch Sites Map")
+st.markdown("Geographic distribution of SpaceX launch sites. Green circles indicate successful missions, red indicate failures.")
 
-launch_map = folium.Map(location=[28.5, -80.6], zoom_start=3)
+# Base map centered between US and Pacific
+launch_map = folium.Map(location=[28.5, -80.6], zoom_start=4, tiles="CartoDB positron")
+marker_cluster = MarkerCluster().add_to(launch_map)
 
-for _, row in map_df.iterrows():
-    location_name = row.get('location', '28.5,-80.6')
-    lat_lon = location_name.split(',')[-2:]
-    try:
-        lat, lon = float(lat_lon[0]), float(lat_lon[1])
-    except:
-        lat, lon = 28.5, -80.6
+for _, row in filtered_df.iterrows():
+    site = row.get('site_name')
+    # Get exact coordinates for the launchpad
+    if site in LAUNCHPAD_COORDS:
+        lat, lon = LAUNCHPAD_COORDS[site]
+    else:
+        # Fallback to Cape Canaveral
+        lat, lon = 28.5618571, -80.577366
+
+    is_succ = row.get('is_success')
+    color = "green" if is_succ is True else ("red" if is_succ is False else "gray")
+    status_label = "Success" if is_succ is True else ("Failure" if is_succ is False else "Unknown")
+    mission = row.get('mission_name', 'Unknown')
+    rocket = row.get('rocket_name', 'Unknown')
+    orbit_val = row.get('orbit', 'N/A')
 
     folium.CircleMarker(
         location=[lat, lon],
-        radius=6,
-        color=row['color'],
+        radius=7,
+        color=color,
         fill=True,
+        fill_color=color,
         fill_opacity=0.7,
-        popup=f"{row['mission_name']} | {row['rocket_name']} | Success: {row['success']}"
-    ).add_to(launch_map)
+        popup=folium.Popup(f"<b>Mission:</b> {mission}<br><b>Rocket:</b> {rocket}<br><b>Site:</b> {site}<br><b>Orbit:</b> {orbit_val}<br><b>Status:</b> {status_label}", max_width=300)
+    ).add_to(marker_cluster)
 
-st_folium(launch_map, width=700)
+st_folium(launch_map, width="100%", height=500)
+
+st.divider()
 
 # Prediction Tool
-st.header("Launch Success Predictor")
-st.markdown("Enter launch details to estimate success probability:")
+st.header("🔮 Launch Success Predictor")
+st.markdown("Enter launch parameters to estimate the probability of mission success using the trained Random Forest model:")
 
-# Input Features
-payload_mass = st.slider("Payload Mass (kg)", min_value=0, max_value=10000, value=5000)
-year = st.slider("Launch Year", min_value=2006, max_value=2025, value=2020)
-rocket_name = st.selectbox("Rocket Name", sorted(df['rocket_name'].unique()))
-launchpad_name = st.selectbox("Launchpad Name", sorted(df['site_name'].unique()))
+p_col1, p_col2 = st.columns(2)
+with p_col1:
+    payload_mass = st.slider("Payload Mass (kg)", min_value=0, max_value=16000, value=5000, step=100)
+    year = st.slider("Launch Year", min_value=2006, max_value=2026, value=2024)
+    rocket_name = st.selectbox("Rocket Name", sorted(df['rocket_name'].dropna().unique()))
 
-# Input Dictionary
+with p_col2:
+    launchpad_name = st.selectbox("Launchpad Name", sorted(df['site_name'].dropna().unique()))
+    orbits = sorted([o for o in df['orbit'].dropna().unique()])
+    orbit = st.selectbox("Target Orbit", options=orbits)
+
+# Build feature dictionary aligned with training features
+location_name = SITE_TO_LOCATION.get(launchpad_name, '')
 input_dict = {
     'payload_mass': payload_mass,
     'year': year,
     f'rocket_name_{rocket_name}': 1,
-    f'site_name_{launchpad_name}': 1
+    f'site_name_{launchpad_name}': 1,
+    f'location_{location_name}': 1,
+    f'orbit_{orbit}': 1
 }
 
-# Build input data with all model features
-input_data = pd.DataFrame([0] * len(model_features), index=model_features).T
+# Construct dataframe matching model feature schema
+input_data = pd.DataFrame(0, index=[0], columns=model_features)
 
-# Fill in actual user-selected values
-for col in input_dict:
+for col, val in input_dict.items():
     if col in input_data.columns:
-        input_data.at[0, col] = input_dict[col]
+        input_data.at[0, col] = val
 
-# Handle any missing values just in case
 input_data.fillna(0, inplace=True)
 
-# Debugging (optional, remove if deploying)
-# st.write("Input Data Sent to Model:")
-# st.write(input_data)
-
-# Prediction
-if st.button("Predict Launch Success"):
+if st.button("Predict Launch Success", type="primary"):
     try:
         pred = model.predict(input_data)[0]
-        prob = model.predict_proba(input_data)[0][1]
-        st.success(f"Predicted Success: {'Yes' if pred == 1 else 'No'} with probability {prob:.2f}")
+        prob = model.predict_proba(input_data)[0]
+        success_prob = prob[1] if len(prob) > 1 else (1.0 if pred == 1 else 0.0)
+
+        st.subheader("Prediction Result:")
+        if pred == 1:
+            st.success(f"✅ **Predicted Outcome: SUCCESS** (Confidence: {success_prob * 100:.1f}%)")
+        else:
+            fail_prob = prob[0] if len(prob) > 1 else (1.0 - success_prob)
+            st.error(f"⚠️ **Predicted Outcome: FAILURE / ANOMALY** (Failure Risk: {fail_prob * 100:.1f}%)")
+
+        st.progress(float(success_prob))
+        st.caption(f"Estimated Success Probability: {success_prob:.2%}")
+
     except Exception as e:
         st.error("Prediction failed. Error details:")
         st.error(str(e))

@@ -1,29 +1,41 @@
 # 🚀 SpaceX Launch Analysis & Machine Learning Prediction Dashboard
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://streamlit.io)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-spacex--launch--predictor--hadi.streamlit.app-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://spacex-launch-predictor-hadi.streamlit.app/)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SainBux-HadiSeelro/smit-hackathon)
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue.svg?logo=python&logoColor=white)](https://python.org)
 [![Scikit-Learn](https://img.shields.io/badge/scikit--learn-1.3%2B-F7931E.svg?logo=scikit-learn&logoColor=white)](https://scikit-learn.org)
-[![Pandas](https://img.shields.io/badge/pandas-1.5%2B-150458.svg?logo=pandas&logoColor=white)](https://pandas.pydata.org)
 [![Folium](https://img.shields.io/badge/folium-0.14%2B-77B800.svg?logo=leaflet&logoColor=white)](https://python-visualization.github.io/folium/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-An end-to-end Data Science and Machine Learning web application that analyzes historical SpaceX launches, visualizes launchpad sites on an interactive world map, and predicts launch success probability using a trained Random Forest model.
+> 🔴 **Live Web Application:** [https://spacex-launch-predictor-hadi.streamlit.app/](https://spacex-launch-predictor-hadi.streamlit.app/)  
+> 💻 **Source Code:** [https://github.com/SainBux-HadiSeelro/smit-hackathon](https://github.com/SainBux-HadiSeelro/smit-hackathon)
 
 ---
 
-## 📌 Project Overview
+## 📖 About The Project
 
-This project provides data-driven insights into SpaceX orbital launches by leveraging raw telemetry, launch records, payloads, and launchpad details. It bridges exploratory data analysis (EDA) with production-ready interactive dashboards and predictive modeling.
+Space exploration and orbital rocket launches involve astronomical financial investments, complex engineering tolerances, and extreme environmental variables. With each Falcon 9 launch costing upwards of **$60+ Million**, understanding the factors that dictate launch outcomes—and accurately predicting mission success before ignition—is paramount for commercial spaceflight operators and satellite customers.
 
-### ✨ Key Features
+This project delivers a **full-lifecycle Data Science and Machine Learning solution** that:
+1. **Aggregates and Cleans SpaceX Telemetry**: Ingests multi-source historical datasets covering 200+ launches, rocket specifications, payload characteristics, and orbital regimes.
+2. **Performs In-Depth Exploratory Data Analysis (EDA)**: Dissects payload distributions, launch site efficiencies, and year-over-year success trajectory improvements.
+3. **Deploys Geospatial Intelligence**: Maps global launchpad complexes with true geodetic coordinates (Cape Canaveral, Vandenberg Space Force Base, and Kwajalein Atoll) using interactive clustering and telemetry popups.
+4. **Predicts Mission Outcomes in Real-Time**: Integrates a trained **Random Forest Classifier** that takes user-defined payload mass, orbital destination, vehicle class, and launchpad location to estimate the probability of success with dynamic confidence scoring.
+
+---
+
+## ✨ Key Features
 
 - **📊 Comprehensive Historical Analytics**:
-  - Filter and inspect 200+ historical SpaceX missions by launch year, launchpad site, and rocket model (Falcon 1, Falcon 9, Falcon Heavy).
-  - Dynamic KPI cards computing total launches, successful vs. failed missions, and live success rate percentages.
+  - Filter 200+ historical SpaceX missions by calendar year, launch site, and rocket vehicle (Falcon 1, Falcon 9, Falcon Heavy).
+  - Dynamic KPI cards computing total launches, successful vs. failed missions, and real-time success rate percentages.
 
 - **🗺️ Interactive Geospatial Mapping**:
-  - Global map visualization powered by Folium and Leaflet.js.
-  - Accurate GPS coordinates for all major SpaceX launch complexes (Cape Canaveral CCSFS SLC-40, Kennedy Space Center KSC LC-39A, Vandenberg VAFB SLC-4E, and Kwajalein Atoll).
+  - Global interactive Leaflet map powered by Folium and Streamlit.
+  - Pinpoints exact GPS coordinates for all SpaceX launch sites:
+    - **CCSFS SLC-40** & **KSC LC-39A** (Cape Canaveral, FL)
+    - **VAFB SLC-4E** (Vandenberg SFB, CA)
+    - **Kwajalein Atoll** (Omelek Island, Marshall Islands)
   - Clustered mission markers with color-coded success/failure indicators and rich popup telemetry.
 
 - **🔮 Machine Learning Launch Predictor**:
@@ -37,11 +49,12 @@ This project provides data-driven insights into SpaceX orbital launches by lever
 
 | Layer | Technologies |
 |---|---|
-| **Frontend / Dashboard** | [Streamlit](https://streamlit.io/), [Streamlit-Folium](https://github.com/randyzwitch/streamlit-folium) |
+| **Frontend / Web App** | [Streamlit](https://streamlit.io/), [Streamlit-Folium](https://github.com/randyzwitch/streamlit-folium) |
 | **Data Processing & EDA** | [Pandas](https://pandas.pydata.org/), [NumPy](https://numpy.org/) |
 | **Geospatial Visuals** | [Folium](https://python-visualization.github.io/folium/), [Leaflet.js](https://leafletjs.com/) |
 | **Machine Learning** | [Scikit-Learn](https://scikit-learn.org/), [Joblib](https://joblib.readthedocs.io/) |
 | **Data Visualization (EDA)** | [Matplotlib](https://matplotlib.org/), [Seaborn](https://seaborn.pydata.org/) |
+| **Cloud Hosting** | [Streamlit Community Cloud](https://share.streamlit.io/) |
 
 ---
 
@@ -52,6 +65,7 @@ This project provides data-driven insights into SpaceX orbital launches by lever
 ├── smit-hackathon.ipynb        # Jupyter Notebook for EDA, data cleaning & model training
 ├── random_forest_model.pkl     # Pre-trained Random Forest Classifier
 ├── requirements.txt            # Python dependencies
+├── README.md                   # Project documentation & portfolio showcase
 ├── SPECS.md                    # Detailed Technical & System Specifications
 ├── spacex_cleaned.csv          # Cleaned dataset used by the dashboard
 ├── launches.csv                # SpaceX raw launches dataset
@@ -77,7 +91,7 @@ This project provides data-driven insights into SpaceX orbital launches by lever
 
 ---
 
-## ⚡ Quick Start & Installation
+## ⚡ Quick Start & Local Installation
 
 ### 1. Clone the Repository
 ```bash
@@ -110,24 +124,20 @@ The application will launch in your default web browser at `http://localhost:850
 
 ---
 
-## 🎯 Usage Walkthrough
+## 🌐 Live Application Link
 
-1. **Dashboard Overview**: Review overall SpaceX mission statistics at the top of the page.
-2. **Filter Launches**: Use the dropdown filters to narrow down launches by specific launchpad, rocket type, or year.
-3. **Explore Launch Sites**: Zoom into the interactive map to see launch clusters around Florida, California, and the Marshall Islands. Click any pin to view mission details.
-4. **Predict Mission Outcome**:
-   - Set the planned payload mass in kg.
-   - Choose the target orbit and launch year.
-   - Select the rocket vehicle and launch site.
-   - Click **Predict Launch Success** to see the machine learning model's probability estimate.
+You can access and interact with the deployed application directly in your browser without any setup:
+
+👉 **[Launch SpaceX Predictor Dashboard](https://spacex-launch-predictor-hadi.streamlit.app/)**
 
 ---
 
 ## 👤 Author
 
 **Sain Bux (Hadi Seelro)**
-- GitHub: [@SainBux-HadiSeelro](https://github.com/SainBux-HadiSeelro)
-- Repository: [smit-hackathon](https://github.com/SainBux-HadiSeelro/smit-hackathon)
+- **Live App**: [spacex-launch-predictor-hadi.streamlit.app](https://spacex-launch-predictor-hadi.streamlit.app/)
+- **GitHub**: [@SainBux-HadiSeelro](https://github.com/SainBux-HadiSeelro)
+- **Repository**: [smit-hackathon](https://github.com/SainBux-HadiSeelro/smit-hackathon)
 
 ---
 

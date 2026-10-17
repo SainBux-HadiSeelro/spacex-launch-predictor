@@ -1,14 +1,14 @@
 # 🚀 SpaceX Launch Analysis & Machine Learning Prediction Dashboard
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-spacex--launch--predictor--hadi.streamlit.app-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://spacex-launch-predictor-hadi.streamlit.app/)
-[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SainBux-HadiSeelro/smit-hackathon)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SainBux-HadiSeelro/spacex-launch-predictor)
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue.svg?logo=python&logoColor=white)](https://python.org)
 [![Scikit-Learn](https://img.shields.io/badge/scikit--learn-1.3%2B-F7931E.svg?logo=scikit-learn&logoColor=white)](https://scikit-learn.org)
 [![Folium](https://img.shields.io/badge/folium-0.14%2B-77B800.svg?logo=leaflet&logoColor=white)](https://python-visualization.github.io/folium/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > 🔴 **Live Web Application:** [https://spacex-launch-predictor-hadi.streamlit.app/](https://spacex-launch-predictor-hadi.streamlit.app/)  
-> 💻 **Source Code:** [https://github.com/SainBux-HadiSeelro/smit-hackathon](https://github.com/SainBux-HadiSeelro/smit-hackathon)
+> 💻 **Source Code:** [https://github.com/SainBux-HadiSeelro/spacex-launch-predictor](https://github.com/SainBux-HadiSeelro/spacex-launch-predictor)
 
 ---
 
@@ -95,8 +95,8 @@ This project delivers a **full-lifecycle Data Science and Machine Learning solut
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/SainBux-HadiSeelro/smit-hackathon.git
-cd smit-hackathon
+git clone https://github.com/SainBux-HadiSeelro/spacex-launch-predictor.git
+cd spacex-launch-predictor
 ```
 
 ### 2. Set Up a Virtual Environment (Recommended)
@@ -137,7 +137,7 @@ You can access and interact with the deployed application directly in your brows
 **Sain Bux (Hadi Seelro)**
 - **Live App**: [spacex-launch-predictor-hadi.streamlit.app](https://spacex-launch-predictor-hadi.streamlit.app/)
 - **GitHub**: [@SainBux-HadiSeelro](https://github.com/SainBux-HadiSeelro)
-- **Repository**: [smit-hackathon](https://github.com/SainBux-HadiSeelro/smit-hackathon)
+- **Repository**: [spacex-launch-predictor](https://github.com/SainBux-HadiSeelro/spacex-launch-predictor)
 
 ---
 
